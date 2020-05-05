@@ -1,26 +1,132 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState, useEffect, useReducer} from 'react';
 import './App.css';
+import List from './components/List'
+import Search from './components/Search'
+import Item from './components/Item'
+import Comic from './components/Comic'
+import Character from './components/Character'
+
+import LoadingPage from './components/LoadingPage'
+import ErrorPage from './components/ErrorPage'
+
+import comicsReducer from './reducers/comicsReducer'
+
+import fetchCharacters, {fetchComics } from './utils/fetchData'
+// import initialcomics from './comics.json'
+//import characters  from './characters.json'
+
+
+
+const useSemiPersistentState = (key, initialState) => {
+
+  const [value, setValue] = useState(
+    localStorage.getItem(key) || initialState
+  )
+
+  useEffect(() => {
+    localStorage.setItem(key, value)
+  }, [key, value])
+
+  return [value, setValue] 
+}
+
 
 function App() {
+
+  const welcome = {
+    greeting:'Marvel',
+    title:'Comics'
+  }
+  
+  // Set SearchTearm using custom hook 
+   const [searchTerm , setSearchTerm] = useSemiPersistentState('search', '')
+
+   // State management using useReducer Hook
+   // Page the reducer and the initial State
+   // dispatch Function will be used for reducer - Passing the Type and Payload
+   const [comics, dispatchComics ] = useReducer(
+    comicsReducer, 
+    [])
+
+   const [isLoading, setIsLoading] = useState(false)
+
+   const [isError, setError] = useState(false)
+  
+    useEffect(() => {
+      setIsLoading(true)
+      
+      fetchComics().then(results => {
+
+        // Call the dispatch function by passing type and payload
+        // In this case the entire fetched result
+        // When we enhace to make infinite loop - Will change the reducer to add the comic
+        dispatchComics({
+          type:'SET_COMICS',
+          payload:results
+        })
+
+
+      }).catch(()=> {
+        setError(true)
+      })
+      setIsLoading(false)
+    }, [])
+
+
+  const handleChange = e => {
+      setSearchTerm(e.target.value)
+  }
+
+
+  const handleRemoveItem = item => {
+    // const newComics = comics.filter(comic => item.id != comic.id)
+    dispatchComics({
+      type:'REMOVE_COMIC',
+      payload:item
+    })
+    // setComics(newComics)
+  }
+
+  // fetchComics()
+  const searchList = comics.filter((comic) => comic.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
   return (
+
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <h1>{welcome.greeting} {welcome.title} </h1>
+
+     <Search 
+      id='search'
+      label='Search'
+      isFocused
+      onSearch={handleChange} 
+      value={searchTerm}>
+      <strong>Search:</strong></Search> 
+
+
+     {/* <List list={searchedStories} component={Item}/>   */}
+
+      <hr />
+      
+      {isError && <ErrorPage />}
+
+      {isLoading ? ( 
+        <LoadingPage />
+        ) : (
+          <List list={searchList} onRemoveItem={handleRemoveItem} component={Comic}  />
+        )
+      }
+
+
+      {/* <hr /> 
+     
+      <List list={characters} component={Character} /> 
+      */}
+      
     </div>
   );
 }
 
 export default App;
+
+
