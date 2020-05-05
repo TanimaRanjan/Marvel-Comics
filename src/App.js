@@ -44,32 +44,31 @@ function App() {
    // State management using useReducer Hook
    // Page the reducer and the initial State
    // dispatch Function will be used for reducer - Passing the Type and Payload
+   // Combining useStates to useReducers 
    const [comics, dispatchComics ] = useReducer(
     comicsReducer, 
-    [])
+    {data:[], isLoading:false, isError:false})
+   
 
-   const [isLoading, setIsLoading] = useState(false)
-
-   const [isError, setError] = useState(false)
-  
     useEffect(() => {
-      setIsLoading(true)
-      
+      dispatchComics({type:'COMIC_FETCH_INIT'})
+      //setIsLoading(true)
       fetchComics().then(results => {
 
         // Call the dispatch function by passing type and payload
         // In this case the entire fetched result
         // When we enhace to make infinite loop - Will change the reducer to add the comic
         dispatchComics({
-          type:'SET_COMICS',
+          type:'COMIC_FETCH_SUCCESS',
           payload:results
         })
 
 
       }).catch(()=> {
-        setError(true)
+        dispatchComics({type:'COMIC_FETCH_ERROR'})
+        //setError(true)
       })
-      setIsLoading(false)
+      //setIsLoading(false)
     }, [])
 
 
@@ -88,7 +87,7 @@ function App() {
   }
 
   // fetchComics()
-  const searchList = comics.filter((comic) => comic.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const searchList = comics.data.filter((comic) => comic.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
   return (
 
@@ -108,9 +107,9 @@ function App() {
 
       <hr />
       
-      {isError && <ErrorPage />}
+      {comics.isError && <ErrorPage />}
 
-      {isLoading ? ( 
+      {comics.isLoading ? ( 
         <LoadingPage />
         ) : (
           <List list={searchList} onRemoveItem={handleRemoveItem} component={Comic}  />
