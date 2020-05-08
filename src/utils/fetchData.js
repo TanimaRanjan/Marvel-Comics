@@ -1,13 +1,27 @@
+
+
 const API_ENDPOINT = 'https://gateway.marvel.com:443/v1/public/'
 //characters?limit=100&offset=20'
-const PARAM_LIMIT='?limit=100'
+const PARAM_API='apikey='
+const PARAM_LIMIT='limit='
+const PARAM_LIMIT_COUNT='100'
+const PARAM_OFFSET='offset='
+const PARAM_OFFSET_COUNT='0'
 const PARAM_CHARACTER = 'characters' 
 const PARAM_COMICS = 'comics'
 
+//comics
+//creators
+//characters
+//events
+//series
+//stories
 
- const fetchCharacters = async () => {
 
-    const response = await fetch(`${API_ENDPOINT}${PARAM_CHARACTER}${PARAM_LIMIT}&apikey=${process.env.REACT_APP_GOOGLE_KEY}`)
+ const fetchCharacters = async ({type='comics', offset=0}={}) => {
+
+    
+    const response = await fetch(`${API_ENDPOINT}${PARAM_CHARACTER}?${PARAM_LIMIT}${PARAM_LIMIT_COUNT}&${PARAM_API}${process.env.REACT_APP_GOOGLE_KEY}`)
     const result = await response.json()
     
     //.then(response => response.json())
@@ -19,10 +33,11 @@ const PARAM_COMICS = 'comics'
 
 }
 
-export const fetchComics = async () => {
-
+export const fetchComics = async(type='comics', offset=2) => {
+    //console.log('FETCHING ', offset_count)
+    let offset_count = offset*PARAM_LIMIT_COUNT;
     try {
-        const response = await fetch(`${API_ENDPOINT}${PARAM_COMICS}${PARAM_LIMIT}&apikey=${process.env.REACT_APP_GOOGLE_KEY}`)
+        const response = await fetch(`${API_ENDPOINT}${type}?${PARAM_LIMIT}${PARAM_LIMIT_COUNT}&${PARAM_OFFSET}${offset_count}&${PARAM_API}${process.env.REACT_APP_GOOGLE_KEY}`)
         const result = await response.json()
         return result.data.results 
         // throw 'error'
