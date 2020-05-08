@@ -12,6 +12,9 @@ import ErrorPage from './components/ErrorPage'
 import comicsReducer from './reducers/comicsReducer'
 
 import fetchCharacters, {fetchComics } from './utils/fetchData'
+
+import { ReactComponent as Check } from './check.svg'
+
 // import initialcomics from './comics.json'
 //import characters  from './characters.json'
 
@@ -45,6 +48,8 @@ function App() {
    // Page the reducer and the initial State
    // dispatch Function will be used for reducer - Passing the Type and Payload
    // Combining useStates to useReducers 
+
+
    const [comics, dispatchComics ] = useReducer(
     comicsReducer, 
     {data:[], isLoading:false, isError:false})
@@ -53,8 +58,9 @@ function App() {
     useEffect(() => {
       dispatchComics({type:'COMIC_FETCH_INIT'})
       //setIsLoading(true)
+      console.log('FETCHING')
       fetchComics().then(results => {
-
+        
         // Call the dispatch function by passing type and payload
         // In this case the entire fetched result
         // When we enhace to make infinite loop - Will change the reducer to add the comic
@@ -64,12 +70,14 @@ function App() {
         })
 
 
-      }).catch(()=> {
+      }).catch((error)=> {
+        console.log(error)
         dispatchComics({type:'COMIC_FETCH_ERROR'})
         //setError(true)
       })
       //setIsLoading(false)
     }, [])
+
 
 
   const handleChange = e => {
@@ -92,7 +100,7 @@ function App() {
   return (
 
     <div className="App">
-     <h1>{welcome.greeting} {welcome.title} </h1>
+     <h1>{welcome.greeting} {welcome.title} <Check height="18px" width="18px" /></h1>
 
      <Search 
       id='search'
@@ -101,7 +109,7 @@ function App() {
       onSearch={handleChange} 
       value={searchTerm}>
       <strong>Search:</strong></Search> 
-
+      
 
      {/* <List list={searchedStories} component={Item}/>   */}
 
